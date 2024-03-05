@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["dom"],
+    "paths": {
+      "@vue/*": ["packages/*/src"]
+    },
+    "types": ["packages/global.d.ts"]
+  },
+  "include": ["packages"]
+}
