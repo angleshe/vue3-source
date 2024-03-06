@@ -4,7 +4,8 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
-    "types": ["node"]
+    "types": ["node"],
+    "noEmit": true
   },
   "exclude": ["node_modules", "packages"],
   "references": [

@@ -1,17 +1,24 @@
 import { isString } from '@vue/shared';
-interface VueOptions {}
+import { createRenderer, ComponentOptions } from '@vue/runtime-core';
+const baseCreateApp = createRenderer<Element>({});
 export function createApp() {
-  return {
-    mount(app: VueOptions, selectors: string) {
-      if (isString(selectors)) {
-        const container = document.querySelector<Element>(selectors);
-        if (!container) {
-          __DEV__ && console.warn('版定容器为空!');
-          return;
-        }
-        container.innerHTML = '';
-        console.log('container', container);
+  const app = baseCreateApp();
+  const mount = app.mount;
+  (app.mount as unknown) = (component: ComponentOptions, selectors: string) => {
+    if (isString(selectors)) {
+      const container = document.querySelector<Element>(selectors);
+      if (!container) {
+        __DEV__ && console.warn('版定容器为空!');
+        return;
       }
-    },
+
+      if (__RUNTIME_COMPILE__ && !component.render && !component.template) {
+        component.template = container.innerHTML;
+      }
+      container.innerHTML = '';
+      return mount(component, container);
+    }
   };
+
+  return app;
 }

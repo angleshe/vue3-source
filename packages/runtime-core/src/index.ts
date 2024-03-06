@@ -1,3 +1,3 @@
-export function createApp() {
-  console.log('createApp====>');
-}
+export { createRenderer } from './renderer';
+export * from './type';
+export * from './shapeFlags';

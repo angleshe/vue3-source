@@ -20,7 +20,7 @@
     "*": "prettier --write --cache --ignore-unknown",
     "*.{ts,tsx,js,jsx}": [
       "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ --fix",
-      "bash -c tsc -p tsconfig.json --noEmit"
+      "bash -c tsc"
     ]
   },
   "devDependencies": {
