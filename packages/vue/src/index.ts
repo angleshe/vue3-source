@@ -1,4 +1,4 @@
-export * from '@vue/runtime-dom'
+export * from '@vue/runtime-dom';
 function log(msg: string): void {
   console.log(msg);
 }

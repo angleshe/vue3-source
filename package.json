@@ -4,11 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx ./scripts/dev"
+    "dev": "tsx ./scripts/dev",
+    "lint:eslint": "eslint . --ext .js,.mjs,.ts,.tsx --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
+    "lint:eslint:fix": "pnpm lint:eslint --fix",
+    "lint:prettier": "prettier --ignore-unknown --cache --check .",
+    "lint:prettier:fix": "prettier --ignore-unknown --cache --write .",
+    "lint": "pnpm lint:eslint && pnpm lint:prettier",
+    "lint:fix": "pnpm lint:eslint:fix && pnpm lint:prettier:fix",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "lint-staged": {
+    "*": "prettier --write --cache --ignore-unknown",
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ --fix",
+      "bash -c tsc -p tsconfig.json --noEmit"
+    ]
+  },
   "devDependencies": {
     "@rollup/plugin-replace": "^5.0.5",
     "@rollup/plugin-typescript": "^11.1.6",
@@ -21,6 +35,8 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-sort-class-members": "^1.20.0",
     "execa": "^8.0.1",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "minimist": "^1.2.8",
     "prettier": "^3.2.5",
     "rollup": "^4.12.0",

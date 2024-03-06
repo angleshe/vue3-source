@@ -4,11 +4,12 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "lib": ["dom"],
+    "lib": ["dom", "ESNext"],
     "paths": {
       "@vue/*": ["packages/*/src"]
     },
-    "types": ["packages/global.d.ts"]
+    "types": ["./packages/global.d.ts"],
+    "composite": true
   },
   "include": ["packages"]
 }

@@ -1,5 +1,7 @@
 {
-  "cSpell.words": [
-    "execa"
-  ]
+  "cSpell.words": ["execa"],
+  "eslint.options": {
+    "overrideConfigFile": ".eslintrc.cjs"
+  },
+  "prettier.configPath": ".prettierrc.mjs"
 }
