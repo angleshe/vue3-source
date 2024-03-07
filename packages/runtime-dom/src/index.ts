@@ -22,3 +22,5 @@ export function createApp() {
 
   return app;
 }
+
+export * from '@vue/runtime-core';
