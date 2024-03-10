@@ -11,6 +11,7 @@ export type TemplateChildNode = TextNode;
 export interface RootNode extends Node {
   type: NodeType.ROOT;
   children: TemplateChildNode[];
+  codegenNode?: TemplateChildNode;
 }
 
 export enum NodeType {
