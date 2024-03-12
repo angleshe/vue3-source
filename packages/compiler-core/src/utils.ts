@@ -1,4 +1,12 @@
-import type { Position } from './ast';
+import {
+  createSequenceExpression,
+  type CallExpression,
+  type Position,
+  type SequenceExpression,
+  createCallExpression,
+} from './ast';
+import { TransformContext } from './options';
+import { OPEN_BLOCK } from './runtimeHelpers';
 const NEWLINE_CHAR_CODE = 10;
 export function advancePositionWithMutation(
   pos: Position,
@@ -21,4 +29,20 @@ export function advancePositionWithMutation(
       ? pos.column + numberOfCharacters
       : Math.max(1, numberOfCharacters - lastNewLinePos);
   return pos;
+}
+
+const nonIdentifierRE = /^\d|[^$\w]/;
+
+export function isSimpleIdentifier(name: string): boolean {
+  return !nonIdentifierRE.test(name);
+}
+
+export function createBlockExpression(
+  blockExp: CallExpression,
+  context: TransformContext,
+): SequenceExpression {
+  return createSequenceExpression([
+    createCallExpression(context.helper(OPEN_BLOCK)),
+    blockExp,
+  ]);
 }

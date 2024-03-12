@@ -1,6 +1,9 @@
 import { RootNode, TemplateChildNode } from './ast';
 import { CompilerError } from './error';
-export interface TransformContext extends Required<TransformOptions> {}
+export interface TransformContext extends Required<TransformOptions> {
+  helpers: Set<symbol>;
+  helper<T extends symbol>(name: T): T;
+}
 export type NodeTransform = (
   node: RootNode | TemplateChildNode,
   context: TransformContext,

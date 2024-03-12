@@ -7,4 +7,10 @@ export function isObject(val: unknown): val is Record<any, any> {
   return val !== null && typeof val === 'object';
 }
 
+export const isArray = Array.isArray;
+
+export function isSymbol(val: unknown): val is symbol {
+  return typeof val === 'symbol';
+}
+
 export const NOOP = () => {};

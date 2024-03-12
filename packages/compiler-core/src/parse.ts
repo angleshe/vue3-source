@@ -26,6 +26,7 @@ export function parse(content: string, options: ParserOptions = {}): RootNode {
   return {
     type: NodeType.ROOT,
     children: parseChildren(context),
+    helper: [],
   };
 }
 
