@@ -23,6 +23,7 @@ const rollupOptions: RollupOptions = {
     replace({
       __DEV__: true,
       __RUNTIME_COMPILE__: true,
+      __FEATURE_OPTIONS__: true,
     }),
   ],
 };

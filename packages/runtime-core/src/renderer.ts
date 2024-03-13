@@ -1,5 +1,5 @@
 import { createAppAPI } from './apiApp';
-import { createComponentInstance, finishComponentSetup } from './component';
+import { createComponentInstance, setupStatefulComponent } from './component';
 import { renderComponentRoot } from './componentRenderUtils';
 import { ShapeFlags, isComponentShapeFlag } from './shapeFlags';
 import {
@@ -46,7 +46,7 @@ export function createRenderer<HostNode, HostElement>(
 
     // 2.设置状态组件
     if (vnode.shapeFlag === ShapeFlags.STATEFUL_COMPONENT) {
-      finishComponentSetup(instance);
+      setupStatefulComponent(instance);
     }
 
     // 3.设置渲染效果

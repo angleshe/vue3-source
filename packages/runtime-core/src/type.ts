@@ -1,6 +1,8 @@
 import type { ShapeFlags } from './shapeFlags';
 
-export interface ComponentOptions {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export interface ComponentOptions<D = {}> {
+  data?: D;
   render?: RenderFunction;
   template?: string;
 }
@@ -30,10 +32,17 @@ export type Component = ComponentOptions;
 
 export type VNodeType = Component | typeof Text;
 
+export type Data = Record<string, unknown>;
+
 export interface ComponentInternalInstance {
   type: Component;
   render?: RenderFunction;
+  proxy: ComponentPublicInstance | null;
+  data: Data;
 }
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ComponentPublicInstance = {};
 
 export type RenderFunction = () => VNodeChild | void;
 

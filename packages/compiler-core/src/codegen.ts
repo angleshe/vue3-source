@@ -174,6 +174,8 @@ export function generate(ast: RootNode): CodegenResult {
   push('return ');
   push('function render() {');
   indent();
+  push('with (this) {');
+  indent();
   if (hasHelper) {
     push(
       `const { ${ast.helper.map((s) => `${helperNameMap[s]}: _${helperNameMap[s]}`).join(',')} } = _Vue`,
@@ -186,6 +188,8 @@ export function generate(ast: RootNode): CodegenResult {
   } else {
     push('null');
   }
+  deindent();
+  push('}');
   deindent();
   push('}');
 

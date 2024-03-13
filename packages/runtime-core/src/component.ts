@@ -1,10 +1,12 @@
-import { NOOP } from '@vue/shared';
+import { EMPTY_OBJ, NOOP } from '@vue/shared';
 import type {
   CompileFunction,
   Component,
   ComponentInternalInstance,
   VNode,
 } from './type';
+import { publicInstanceProxyHandlers } from './componentProxy';
+import { applyOptions } from './apiOptions';
 
 let compile: CompileFunction | undefined;
 
@@ -17,6 +19,8 @@ export function createComponentInstance(
 ): ComponentInternalInstance {
   return {
     type: vnode.type as Component,
+    proxy: null,
+    data: EMPTY_OBJ,
   };
 }
 
@@ -34,4 +38,13 @@ export function finishComponentSetup(instance: ComponentInternalInstance) {
   }
 
   instance.render = Component.render ?? NOOP;
+
+  if (__FEATURE_OPTIONS__) {
+    applyOptions(instance, Component);
+  }
+}
+
+export function setupStatefulComponent(instance: ComponentInternalInstance) {
+  instance.proxy = new Proxy(instance, publicInstanceProxyHandlers);
+  finishComponentSetup(instance);
 }

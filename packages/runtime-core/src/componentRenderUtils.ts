@@ -4,6 +4,7 @@ import { normalizeVNode } from './vnode';
 export function renderComponentRoot(
   instance: ComponentInternalInstance,
 ): VNode {
-  const result = normalizeVNode(instance.render!());
+  const { proxy } = instance;
+  const result = normalizeVNode(instance.render!.call(proxy));
   return result;
 }

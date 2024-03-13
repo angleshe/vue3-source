@@ -1,3 +1,4 @@
+export { makeMap } from './makeMap';
 export function isString(val: unknown): val is string {
   return typeof val === 'string';
 }
@@ -14,3 +15,19 @@ export function isSymbol(val: unknown): val is symbol {
 }
 
 export const NOOP = () => {};
+
+export const EMPTY_OBJ: { readonly [key: string]: never } = __DEV__
+  ? Object.freeze({})
+  : {};
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+export const hasOwn = (val: object, key: string | symbol) =>
+  hasOwnProperty.call(val, key);
+
+export const objectToString = Object.prototype.toString;
+export const toTypeString = (value: unknown): string =>
+  objectToString.call(value);
+export function toRawType(value: unknown): string {
+  return toTypeString(value).slice(8, -1);
+}
