@@ -1,4 +1,5 @@
 export { makeMap } from './makeMap';
+export * from './domTagConfig';
 export function isString(val: unknown): val is string {
   return typeof val === 'string';
 }
@@ -15,6 +16,8 @@ export function isSymbol(val: unknown): val is symbol {
 }
 
 export const NOOP = () => {};
+
+export const No = () => false;
 
 export const EMPTY_OBJ: { readonly [key: string]: never } = __DEV__
   ? Object.freeze({})

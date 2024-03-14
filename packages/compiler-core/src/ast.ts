@@ -1,3 +1,7 @@
+export enum ElementTypes {
+  ELEMENT,
+  COMPONENT,
+}
 export interface Node {
   type: NodeType;
 }
@@ -33,7 +37,26 @@ export interface SequenceExpression extends Node {
   expressions: JSChildNode[];
 }
 
+export interface BaseElementNode extends Node {
+  type: NodeType.ELEMENT;
+  tag: string;
+  tagType: ElementTypes;
+  children: TemplateChildNode[];
+  isSelfClosing: boolean;
+}
+
+export interface PlainElementNode extends BaseElementNode {
+  tagType: ElementTypes.ELEMENT;
+}
+
+export interface ComponentNode extends BaseElementNode {
+  tagType: ElementTypes.COMPONENT;
+}
+
+export type ElementNode = PlainElementNode | ComponentNode;
+
 export type TemplateChildNode =
+  | ElementNode
   | TextNode
   | InterpolationNode
   | CompoundExpressionNode;
@@ -51,6 +74,7 @@ export interface RootNode extends Node {
 
 export enum NodeType {
   ROOT,
+  ELEMENT,
   TEXT,
   SIMPLE_EXPRESSION,
   INTERPOLATION,

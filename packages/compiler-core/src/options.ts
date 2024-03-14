@@ -15,4 +15,6 @@ export interface TransformOptions {
 export interface ParserOptions {
   delimiters?: [string, string];
   onError?: (error: CompilerError) => void;
+  isNativeTag?: (tag: string) => boolean;
+  isVoidTag?: (tag: string) => boolean;
 }

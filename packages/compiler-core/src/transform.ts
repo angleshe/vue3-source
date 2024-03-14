@@ -78,6 +78,7 @@ function finalizeRoot(root: RootNode, context: TransformContext) {
 }
 
 export function transform(root: RootNode, options: TransformOptions): void {
+  console.log('transform====>', root);
   const context = createTransformContext(options);
   traverseNode(root, context);
   finalizeRoot(root, context);

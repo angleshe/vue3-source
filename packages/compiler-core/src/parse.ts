@@ -1,3 +1,4 @@
+import { No } from '@vue/shared';
 import {
   type RootNode,
   NodeType,
@@ -5,12 +6,16 @@ import {
   TextNode,
   type Position,
   type InterpolationNode,
+  ElementTypes,
+  ElementNode,
 } from './ast';
 import { ErrorCodes, createCompilerError, defaultOnError } from './error';
 import type { ParserOptions } from './options';
 import { advancePositionWithMutation } from './utils';
 
-type MergedParserOptions = Required<ParserOptions>;
+type OptionalOptions = 'isNativeTag';
+type MergedParserOptions = Omit<Required<ParserOptions>, OptionalOptions> &
+  Pick<ParserOptions, OptionalOptions>;
 interface ParserContext extends Position {
   options: MergedParserOptions;
   source: string;
@@ -19,6 +24,7 @@ interface ParserContext extends Position {
 export const defaultParserOptions: MergedParserOptions = {
   delimiters: ['{{', '}}'],
   onError: defaultOnError,
+  isVoidTag: No,
 };
 
 export function parse(content: string, options: ParserOptions = {}): RootNode {
@@ -55,9 +61,27 @@ function advanceBy(context: ParserContext, numberOfCharacters: number) {
   context.source = source.slice(numberOfCharacters);
 }
 
+function advanceSpaces(context: ParserContext) {
+  const match = /\s+/.exec(context.source);
+  if (match) {
+    advanceBy(context, match[0].length);
+  }
+}
+
 function isEnd(context: ParserContext): boolean {
   const s = context.source;
+  if (s.startsWith('</')) {
+    return true;
+  }
   return !s;
+}
+
+function startsWithEndTagOpen(source: string, tag: string): boolean {
+  return (
+    source.startsWith('</') &&
+    source.substring(2, 2 + tag.length).toLowerCase() === tag.toLowerCase() &&
+    /[\s>]/.test(source[2 + tag.length])
+  );
 }
 
 function parseTextData(context: ParserContext, length: number): string {
@@ -120,6 +144,62 @@ function parseInterpolation(
   };
 }
 
+enum TagType {
+  Start,
+  End,
+}
+
+function parseTag(context: ParserContext, type: TagType): ElementNode {
+  const match = /^<\/?([a-z][^\s/>]*)/.exec(context.source);
+  const tag = match[1];
+  advanceBy(context, match[0].length);
+  advanceSpaces(context);
+  let isSelfClosing: boolean = false;
+  if (context.source.length === 0) {
+    emitError(context, ErrorCodes.EOF_IN_TAG);
+  } else {
+    isSelfClosing = context.source.startsWith('/>');
+    if (type === TagType.End && isSelfClosing) {
+      emitError(context, ErrorCodes.END_TAG_WITH_TRAILING_SOLIDUS);
+    }
+    advanceBy(context, isSelfClosing ? 2 : 1);
+  }
+
+  let tagType: ElementTypes = ElementTypes.ELEMENT;
+
+  if (context.options.isNativeTag?.(tag)) {
+    tagType = ElementTypes.COMPONENT;
+  }
+
+  return {
+    tag,
+    tagType,
+    type: NodeType.ELEMENT,
+    children: [],
+    isSelfClosing,
+  };
+}
+
+function parseElement(context: ParserContext): ElementNode {
+  // Start tag
+  const element = parseTag(context, TagType.Start);
+
+  if (element.isSelfClosing || context.options.isVoidTag(element.tag)) {
+    return element;
+  }
+
+  // children
+  element.children = parseChildren(context);
+
+  // End tag
+  if (startsWithEndTagOpen(context.source, element.tag)) {
+    parseTag(context, TagType.End);
+  } else {
+    emitError(context, ErrorCodes.X_MISSING_END_TAG);
+  }
+  return element;
+}
+
 function parseChildren(context: ParserContext): TemplateChildNode[] {
   const nodes: TemplateChildNode[] = [];
   while (!isEnd(context)) {
@@ -127,6 +207,10 @@ function parseChildren(context: ParserContext): TemplateChildNode[] {
     let node: TemplateChildNode | undefined = undefined;
     if (s.startsWith(context.options.delimiters[0])) {
       node = parseInterpolation(context);
+    } else if (s.startsWith('<')) {
+      if (/[a-z]/i.test(s[1])) {
+        node = parseElement(context);
+      }
     }
 
     if (!node) {
