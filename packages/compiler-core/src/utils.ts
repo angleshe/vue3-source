@@ -46,3 +46,13 @@ export function createBlockExpression(
     blockExp,
   ]);
 }
+
+export function toValidAssetId(name: string, type: 'component'): string {
+  return `_${type}_${name.replace(/[^\w]/g, '_')}`;
+}
+
+export function assert(condition: boolean, msg?: string) {
+  if (!condition) {
+    throw new Error(msg || `unexpected compiler condition`);
+  }
+}

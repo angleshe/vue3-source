@@ -2,6 +2,7 @@ import {
   NodeType,
   type RootNode,
   type TemplateChildNode,
+  type ParentNode,
   createCallExpression,
 } from './ast';
 import { TransformContext, TransformOptions } from './options';
@@ -22,7 +23,7 @@ function createTransformContext({
   return context;
 }
 
-function traverseChildren(parent: RootNode, context: TransformContext) {
+function traverseChildren(parent: ParentNode, context: TransformContext) {
   for (let i = 0; i < parent.children.length; i++) {
     const child = parent.children[i];
     traverseNode(child, context);
@@ -44,6 +45,7 @@ function traverseNode(
 
   switch (node.type) {
     case NodeType.ROOT:
+    case NodeType.ELEMENT:
       traverseChildren(node, context);
       break;
     case NodeType.INTERPOLATION:

@@ -62,7 +62,7 @@ function advanceBy(context: ParserContext, numberOfCharacters: number) {
 }
 
 function advanceSpaces(context: ParserContext) {
-  const match = /\s+/.exec(context.source);
+  const match = /^\s+/.exec(context.source);
   if (match) {
     advanceBy(context, match[0].length);
   }
@@ -167,7 +167,7 @@ function parseTag(context: ParserContext, type: TagType): ElementNode {
 
   let tagType: ElementTypes = ElementTypes.ELEMENT;
 
-  if (context.options.isNativeTag?.(tag)) {
+  if (!context.options.isNativeTag?.(tag)) {
     tagType = ElementTypes.COMPONENT;
   }
 

@@ -26,10 +26,22 @@ export interface CompoundExpressionNode extends Node {
   children: (TextNode | InterpolationNode | string)[];
 }
 
+export interface TextCallNode extends Node {
+  type: NodeType.TEXT_CELL;
+  content: TextNode | InterpolationNode | CompoundExpressionNode;
+  codegenNode: CallExpression;
+}
+
 export interface CallExpression extends Node {
   type: NodeType.JS_CALL_EXPRESSION;
   callee: symbol;
-  arguments: (string | JSChildNode | symbol | TemplateChildNode[])[];
+  arguments: (
+    | string
+    | JSChildNode
+    | symbol
+    | TemplateChildNode
+    | TemplateChildNode[]
+  )[];
 }
 
 export interface SequenceExpression extends Node {
@@ -43,6 +55,7 @@ export interface BaseElementNode extends Node {
   tagType: ElementTypes;
   children: TemplateChildNode[];
   isSelfClosing: boolean;
+  codegenNode?: CallExpression;
 }
 
 export interface PlainElementNode extends BaseElementNode {
@@ -59,7 +72,8 @@ export type TemplateChildNode =
   | ElementNode
   | TextNode
   | InterpolationNode
-  | CompoundExpressionNode;
+  | CompoundExpressionNode
+  | TextCallNode;
 
 export type JSChildNode =
   | CallExpression
@@ -80,6 +94,7 @@ export enum NodeType {
   INTERPOLATION,
   // containers
   COMPOUND_EXPRESSION,
+  TEXT_CELL,
   // codegen
   JS_CALL_EXPRESSION,
   JS_SEQUENCE_EXPRESSION,
@@ -96,6 +111,8 @@ export interface SourceLocation {
   end: Position;
   source: string;
 }
+
+export type ParentNode = RootNode | ElementNode;
 
 export function createCallExpression<T extends CallExpression['callee']>(
   callee: T,

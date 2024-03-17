@@ -12,6 +12,7 @@ import {
   TextNode,
 } from './ast';
 import { TO_STRING, helperNameMap } from './runtimeHelpers';
+import { assert } from './utils';
 
 type CodegenNode = TemplateChildNode | JSChildNode;
 export interface CodegenResult {
@@ -154,9 +155,21 @@ function genNode(node: CodegenNode | symbol, context: CodegenContext) {
     case NodeType.JS_SEQUENCE_EXPRESSION:
       genSequenceExpression(node, context);
       break;
+    case NodeType.ELEMENT:
+      __DEV__ &&
+        assert(
+          !!node.codegenNode,
+          `Codegen node is missing for element/if/for node. ` +
+            `Apply appropriate transforms first.`,
+        );
+      genNode(node.codegenNode!, context);
+      break;
+    case NodeType.TEXT_CELL:
+      genNode(node.codegenNode, context);
+      break;
     default:
       if (__DEV__) {
-        const exhaustiveCheck: never = node as never;
+        const exhaustiveCheck: never = node;
         return exhaustiveCheck;
       }
       break;
