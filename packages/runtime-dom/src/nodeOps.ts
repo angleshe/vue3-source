@@ -9,4 +9,13 @@ export const nodeOps: RendererOptions<Node, Element> = {
   insert(el: Node, parent: Element) {
     parent.appendChild(el);
   },
+  createComment(text: string) {
+    return doc.createComment(text);
+  },
+  createElement(type: string) {
+    return doc.createElement(type);
+  },
+  setElementText(node: Element, text: string) {
+    node.textContent = text;
+  },
 };

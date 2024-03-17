@@ -7,13 +7,15 @@ export interface ComponentOptions<D = {}> {
   template?: string;
 }
 
-export type NormalizedChildren = string | null;
+export type NormalizedChildren = string | VNodeChildren | null;
 export interface VNode {
-  type: VNodeType;
+  type: VNodeTypes;
   shapeFlag: ShapeFlags;
   component?: ComponentInternalInstance;
   children: NormalizedChildren;
 }
+
+export interface VNodeChildren extends Array<VNodeChild> {}
 
 export type RootRenderFunction<HostElement> = (
   vnode: VNode,
@@ -25,12 +27,16 @@ export type RootRenderFunction<HostElement> = (
 export interface RendererOptions<HostNode = any, HostElement = any> {
   insert(el: HostNode, parent: HostElement): void;
   createText(text: string): HostNode;
+  createComment(text: string): HostNode;
+  createElement(type: string): HostElement;
+  setElementText(node: HostElement, text: string): void;
 }
 
 export const Text = Symbol(__DEV__ ? 'Text' : undefined);
+export const Fragment = Symbol(__DEV__ ? 'Fragment' : undefined);
 export type Component = ComponentOptions;
 
-export type VNodeType = Component | typeof Text;
+export type VNodeTypes = Component | typeof Text | typeof Fragment | string;
 
 export type Data = Record<string, unknown>;
 
@@ -40,6 +46,8 @@ export interface ComponentInternalInstance {
   proxy: ComponentPublicInstance | null;
   data: Data;
 }
+
+export interface VNodeProps {}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type ComponentPublicInstance = {};
