@@ -5,12 +5,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   </head>
   <body>
-    <div id="demo">demo <button>{{ msg }}</button></div>
+    <div id="demo">demo <button @click="handleClick">{{ msg }}</button></div>
     <script src="../../dist/vue.global.js"></script>
     <script>
       const App = {
         data: {
           msg: 'cc',
+        },
+        methods: {
+          handleClick() {
+            console.log('hello world!!');
+          },
         },
       };
       vue.createApp().mount(App, '#demo');

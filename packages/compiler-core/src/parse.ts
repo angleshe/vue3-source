@@ -8,6 +8,9 @@ import {
   type InterpolationNode,
   ElementTypes,
   ElementNode,
+  ExpressionNode,
+  DirectiveNode,
+  AttributeNode,
 } from './ast';
 import { ErrorCodes, createCompilerError, defaultOnError } from './error';
 import type { ParserOptions } from './options';
@@ -149,11 +152,151 @@ enum TagType {
   End,
 }
 
+function parseAttributes(
+  context: ParserContext,
+  type: TagType,
+): (AttributeNode | DirectiveNode)[] {
+  const props: (AttributeNode | DirectiveNode)[] = [];
+  const attributeNames = new Set<string>();
+  while (
+    context.source.length > 0 &&
+    !context.source.startsWith('>') &&
+    !context.source.startsWith('/>')
+  ) {
+    if (type === TagType.End) {
+      emitError(context, ErrorCodes.END_TAG_WITH_ATTRIBUTES);
+    }
+    const attr = parseAttribute(context, attributeNames);
+    if (type === TagType.Start) {
+      props.push(attr);
+    }
+
+    if (/^[^\s/>]/.test(context.source)) {
+      emitError(context, ErrorCodes.MISSING_WHITESPACE_BETWEEN_ATTRIBUTES);
+    }
+
+    advanceSpaces(context);
+  }
+
+  return props;
+}
+
+function parseAttribute(
+  context: ParserContext,
+  nameSet: Set<string>,
+): DirectiveNode | AttributeNode {
+  const match = /^[^\s/>][^\s/>=]*/.exec(context.source)!;
+
+  const name = match[0];
+
+  if (nameSet.has(name)) {
+    emitError(context, ErrorCodes.DUPLICATE_ATTRIBUTE);
+  }
+  nameSet.add(name);
+
+  if (name.startsWith('=')) {
+    emitError(context, ErrorCodes.UNEXPECTED_EQUALS_SIGN_BEFORE_ATTRIBUTE_NAME);
+  }
+  if (/["'<]/g.exec(name)) {
+    emitError(context, ErrorCodes.UNEXPECTED_CHARACTER_IN_ATTRIBUTE_NAME);
+  }
+
+  advanceBy(context, name.length);
+
+  let value:
+    | {
+        content: string;
+      }
+    | undefined = undefined;
+
+  if (/^\s*=/.test(context.source)) {
+    advanceSpaces(context);
+    advanceBy(context, 1);
+    advanceSpaces(context);
+    value = parseAttributeValue(context);
+
+    if (!value) {
+      emitError(context, ErrorCodes.MISSING_ATTRIBUTE_VALUE);
+    }
+  }
+
+  if (/^(v-|:|@|#)/.test(name)) {
+    const match = /(?:^v-([a-z0-9-]+))?(?:(?::|^@|^#)([^.]+))?(.+)?$/i.exec(
+      name,
+    );
+
+    let arg: ExpressionNode | undefined;
+    if (match[2]) {
+      arg = {
+        type: NodeType.SIMPLE_EXPRESSION,
+        content: match[2],
+      };
+    }
+
+    return {
+      type: NodeType.DIRECTIVE,
+      name:
+        match[1] ??
+        (name.startsWith(':') ? 'bind' : name.startsWith('@') ? 'on' : 'slot'),
+      arg,
+      exp: value && {
+        type: NodeType.SIMPLE_EXPRESSION,
+        content: value.content,
+      },
+    };
+  }
+  return {
+    type: NodeType.ATTRIBUTE,
+    name,
+    value: value && {
+      type: NodeType.TEXT,
+      content: value.content,
+    },
+  };
+}
+
+function parseAttributeValue(context: ParserContext) {
+  let content: string;
+  const quote = context.source[0];
+  const isQuoted = quote === '"' || quote === `'`;
+
+  if (isQuoted) {
+    advanceBy(context, 1);
+
+    const endIndex = context.source.indexOf(quote);
+
+    if (endIndex === -1) {
+      // TODO 什么case?
+    } else {
+      content = parseTextData(context, endIndex);
+      advanceBy(context, 1);
+    }
+  } else {
+    // TODO 什么case?
+    const match = /^[^\s>]+/.exec(context.source);
+    if (!match) {
+      return undefined;
+    }
+
+    if (/["'<=`]/g.exec(match[0])) {
+      emitError(
+        context,
+        ErrorCodes.UNEXPECTED_CHARACTER_IN_UNQUOTED_ATTRIBUTE_VALUE,
+      );
+    }
+    content = parseTextData(context, match[0].length);
+  }
+  return { content };
+}
+
 function parseTag(context: ParserContext, type: TagType): ElementNode {
   const match = /^<\/?([a-z][^\s/>]*)/.exec(context.source);
   const tag = match[1];
   advanceBy(context, match[0].length);
   advanceSpaces(context);
+
+  const props = parseAttributes(context, type);
+
   let isSelfClosing: boolean = false;
   if (context.source.length === 0) {
     emitError(context, ErrorCodes.EOF_IN_TAG);
@@ -177,6 +320,7 @@ function parseTag(context: ParserContext, type: TagType): ElementNode {
     type: NodeType.ELEMENT,
     children: [],
     isSelfClosing,
+    props,
   };
 }
 

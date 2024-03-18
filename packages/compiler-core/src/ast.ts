@@ -56,6 +56,7 @@ export interface BaseElementNode extends Node {
   children: TemplateChildNode[];
   isSelfClosing: boolean;
   codegenNode?: CallExpression;
+  props: Array<AttributeNode | DirectiveNode>;
 }
 
 export interface PlainElementNode extends BaseElementNode {
@@ -64,6 +65,19 @@ export interface PlainElementNode extends BaseElementNode {
 
 export interface ComponentNode extends BaseElementNode {
   tagType: ElementTypes.COMPONENT;
+}
+
+export interface DirectiveNode extends Node {
+  type: NodeType.DIRECTIVE;
+  name: string;
+  exp?: ExpressionNode;
+  arg?: ExpressionNode;
+}
+
+export interface AttributeNode extends Node {
+  type: NodeType.ATTRIBUTE;
+  name: string;
+  value?: TextNode;
 }
 
 export type ElementNode = PlainElementNode | ComponentNode;
@@ -79,6 +93,8 @@ export type JSChildNode =
   | CallExpression
   | SequenceExpression
   | SimpleExpressionNode;
+
+export type ExpressionNode = SimpleExpressionNode | CompoundExpressionNode;
 export interface RootNode extends Node {
   type: NodeType.ROOT;
   children: TemplateChildNode[];
@@ -92,6 +108,8 @@ export enum NodeType {
   TEXT,
   SIMPLE_EXPRESSION,
   INTERPOLATION,
+  ATTRIBUTE,
+  DIRECTIVE,
   // containers
   COMPOUND_EXPRESSION,
   TEXT_CELL,
