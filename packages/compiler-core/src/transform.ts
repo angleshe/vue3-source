@@ -11,6 +11,7 @@ import { createBlockExpression } from './utils';
 
 function createTransformContext({
   nodeTransforms = [],
+  directiveTransforms = {},
 }: TransformOptions): TransformContext {
   const context: TransformContext = {
     nodeTransforms,
@@ -19,6 +20,7 @@ function createTransformContext({
       context.helpers.add(name);
       return name;
     },
+    directiveTransforms,
   };
   return context;
 }

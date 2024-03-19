@@ -37,6 +37,11 @@ export function isSimpleIdentifier(name: string): boolean {
   return !nonIdentifierRE.test(name);
 }
 
+const memberExpRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\[[^\]]+\])*$/;
+export function isMemberExpression(path: string): boolean {
+  return memberExpRE.test(path);
+}
+
 export function createBlockExpression(
   blockExp: CallExpression,
   context: TransformContext,

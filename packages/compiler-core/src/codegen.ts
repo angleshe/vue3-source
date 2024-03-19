@@ -2,9 +2,11 @@ import { isArray, isString, isSymbol } from '@vue/shared';
 import {
   CallExpression,
   CompoundExpressionNode,
+  ExpressionNode,
   InterpolationNode,
   JSChildNode,
   NodeType,
+  ObjectExpression,
   RootNode,
   SequenceExpression,
   SimpleExpressionNode,
@@ -12,7 +14,7 @@ import {
   TextNode,
 } from './ast';
 import { TO_STRING, helperNameMap } from './runtimeHelpers';
-import { assert } from './utils';
+import { assert, isSimpleIdentifier } from './utils';
 
 type CodegenNode = TemplateChildNode | JSChildNode;
 export interface CodegenResult {
@@ -131,6 +133,48 @@ function genCompoundExpression(
   }
 }
 
+function genExpressionAsPropertyKey(
+  node: ExpressionNode,
+  context: CodegenContext,
+) {
+  const { push } = context;
+  if (node.type !== NodeType.COMPOUND_EXPRESSION) {
+    push(
+      isSimpleIdentifier(node.content)
+        ? node.content
+        : JSON.stringify(node.content),
+    );
+  }
+}
+
+function genObjectExpression(node: ObjectExpression, context: CodegenContext) {
+  const { push, indent, newline, deindent } = context;
+  const { properties } = node;
+  if (!properties.length) {
+    push('{}');
+    return;
+  }
+
+  const multilines = properties.length > 1;
+
+  push(multilines ? '{' : '{ ');
+  multilines && indent();
+  for (let i = 0; i < properties.length; i++) {
+    const { key, value } = properties[i];
+    genExpressionAsPropertyKey(key, context);
+    push(': ');
+
+    genNode(value, context);
+    if (i < properties.length - 1) {
+      push(',');
+      newline();
+    }
+  }
+
+  multilines && deindent();
+  push(multilines ? '}' : ' }');
+}
+
 function genNode(node: CodegenNode | symbol, context: CodegenContext) {
   if (isSymbol(node)) {
     context.push(context.helper(node));
@@ -166,6 +210,9 @@ function genNode(node: CodegenNode | symbol, context: CodegenContext) {
       break;
     case NodeType.TEXT_CELL:
       genNode(node.codegenNode, context);
+      break;
+    case NodeType.JS_OBJECT_EXPRESSION:
+      genObjectExpression(node, context);
       break;
     default:
       if (__DEV__) {

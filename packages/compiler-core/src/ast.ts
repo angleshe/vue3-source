@@ -1,3 +1,5 @@
+import { isString } from '@vue/shared';
+
 export enum ElementTypes {
   ELEMENT,
   COMPONENT,
@@ -21,9 +23,20 @@ export interface SimpleExpressionNode extends Node {
   content: string;
 }
 
+export interface ObjectExpression extends Node {
+  type: NodeType.JS_OBJECT_EXPRESSION;
+  properties: Array<Property>;
+}
+
+export interface Property extends Node {
+  type: NodeType.JS_PROPERTY;
+  key: ExpressionNode;
+  value: JSChildNode;
+}
+
 export interface CompoundExpressionNode extends Node {
   type: NodeType.COMPOUND_EXPRESSION;
-  children: (TextNode | InterpolationNode | string)[];
+  children: (TextNode | InterpolationNode | SimpleExpressionNode | string)[];
 }
 
 export interface TextCallNode extends Node {
@@ -92,7 +105,8 @@ export type TemplateChildNode =
 export type JSChildNode =
   | CallExpression
   | SequenceExpression
-  | SimpleExpressionNode;
+  | ObjectExpression
+  | ExpressionNode;
 
 export type ExpressionNode = SimpleExpressionNode | CompoundExpressionNode;
 export interface RootNode extends Node {
@@ -115,6 +129,8 @@ export enum NodeType {
   TEXT_CELL,
   // codegen
   JS_CALL_EXPRESSION,
+  JS_OBJECT_EXPRESSION,
+  JS_PROPERTY,
   JS_SEQUENCE_EXPRESSION,
 }
 
@@ -149,5 +165,43 @@ export function createSequenceExpression(
   return {
     type: NodeType.JS_SEQUENCE_EXPRESSION,
     expressions,
+  };
+}
+
+export function createObjectExpression(
+  properties: ObjectExpression['properties'],
+): ObjectExpression {
+  return {
+    properties,
+    type: NodeType.JS_OBJECT_EXPRESSION,
+  };
+}
+
+export function createSimpleExpression(
+  content: SimpleExpressionNode['content'],
+): SimpleExpressionNode {
+  return {
+    type: NodeType.SIMPLE_EXPRESSION,
+    content,
+  };
+}
+
+export function createCompoundExpression(
+  children: CompoundExpressionNode['children'],
+): CompoundExpressionNode {
+  return {
+    type: NodeType.COMPOUND_EXPRESSION,
+    children,
+  };
+}
+
+export function createObjectProperty(
+  key: Property['key'] | string,
+  value: Property['value'],
+): Property {
+  return {
+    type: NodeType.JS_PROPERTY,
+    key: isString(key) ? createSimpleExpression(key) : key,
+    value,
   };
 }

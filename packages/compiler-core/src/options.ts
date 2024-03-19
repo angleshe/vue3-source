@@ -1,4 +1,4 @@
-import { RootNode, TemplateChildNode } from './ast';
+import { DirectiveNode, Property, RootNode, TemplateChildNode } from './ast';
 import { CompilerError } from './error';
 export interface TransformContext extends Required<TransformOptions> {
   helpers: Set<symbol>;
@@ -8,8 +8,16 @@ export type NodeTransform = (
   node: RootNode | TemplateChildNode,
   context: TransformContext,
 ) => void | (() => void);
+export interface DirectiveTransformResult {
+  props: Property[];
+}
+export type DirectiveTransform = (
+  dir: DirectiveNode,
+  context: TransformContext,
+) => DirectiveTransformResult;
 export interface TransformOptions {
   nodeTransforms?: NodeTransform[];
+  directiveTransforms?: { [name: string]: DirectiveTransform };
 }
 
 export interface ParserOptions {
