@@ -23,7 +23,7 @@ function getShapeFlag(type: VNodeTypes): ShapeFlags {
 
 export function createVNode(
   type: VNodeTypes,
-  _props: (Data & VNodeProps) | null = null,
+  props: (Data & VNodeProps) | null = null,
   children: NormalizedChildren = null,
 ): VNode {
   if (__DEV__ && !type) {
@@ -33,6 +33,7 @@ export function createVNode(
     type,
     shapeFlag: getShapeFlag(type),
     children: null,
+    props,
   };
   normalizedChildren(vnode, children);
   return vnode;

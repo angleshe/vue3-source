@@ -4,7 +4,7 @@ import type { ComponentInternalInstance } from './type';
 export const publicInstanceProxyHandlers: ProxyHandler<ComponentInternalInstance> =
   {
     get(target: ComponentInternalInstance, key: string) {
-      const { data } = target;
+      const { data, renderContext } = target;
 
       if (
         __RUNTIME_COMPILE__ &&
@@ -16,6 +16,8 @@ export const publicInstanceProxyHandlers: ProxyHandler<ComponentInternalInstance
       if (!key.startsWith('$')) {
         if (data !== EMPTY_OBJ && hasOwn(data, key)) {
           return data[key];
+        } else if (hasOwn(renderContext, key)) {
+          return renderContext[key];
         }
       }
     },

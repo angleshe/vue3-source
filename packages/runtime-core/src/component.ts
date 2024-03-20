@@ -21,6 +21,7 @@ export function createComponentInstance(
     type: vnode.type as Component,
     proxy: null,
     data: EMPTY_OBJ,
+    renderContext: EMPTY_OBJ,
   };
 }
 

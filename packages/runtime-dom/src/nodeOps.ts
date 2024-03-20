@@ -2,7 +2,7 @@ import type { RendererOptions } from '@vue/runtime-core';
 
 const doc = document;
 
-export const nodeOps: RendererOptions<Node, Element> = {
+export const nodeOps: Omit<RendererOptions<Node, Element>, 'patchProp'> = {
   createText(text: string) {
     return doc.createTextNode(text);
   },

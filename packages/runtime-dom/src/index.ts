@@ -1,7 +1,12 @@
 import { isString } from '@vue/shared';
 import { createRenderer, ComponentOptions } from '@vue/runtime-core';
 import { nodeOps } from './nodeOps';
-const baseCreateApp = createRenderer<Node, Element>(nodeOps);
+import { patchProp } from './pathProp';
+
+const baseCreateApp = createRenderer<Node, Element>({
+  patchProp,
+  ...nodeOps,
+});
 export function createApp() {
   const app = baseCreateApp();
   const mount = app.mount;

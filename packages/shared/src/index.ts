@@ -15,6 +15,11 @@ export function isSymbol(val: unknown): val is symbol {
   return typeof val === 'symbol';
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function isFunction(val: unknown): val is Function {
+  return typeof val === 'function';
+}
+
 export const NOOP = () => {};
 
 export const No = () => false;
@@ -33,4 +38,8 @@ export const toTypeString = (value: unknown): string =>
   objectToString.call(value);
 export function toRawType(value: unknown): string {
   return toTypeString(value).slice(8, -1);
+}
+
+export function isOn(key: string) {
+  return key.startsWith('on');
 }

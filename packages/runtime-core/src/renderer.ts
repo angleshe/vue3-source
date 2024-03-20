@@ -25,6 +25,7 @@ export function createRenderer<HostNode, HostElement extends HostNode>(
     insert: hostInsert,
     createElement: hostCreateElement,
     setElementText: hostSetElementText,
+    patchProp: hostPatchProp,
   } = options;
 
   function patch(n1: VNode | null, n2: VNode, container: HostElement) {
@@ -80,7 +81,13 @@ export function createRenderer<HostNode, HostElement extends HostNode>(
   function mountElement(vnode: VNode, container: HostElement) {
     const tag = vnode.type as string;
     const el = hostCreateElement(tag);
-    const { shapeFlag } = vnode;
+    const { shapeFlag, props } = vnode;
+
+    if (props) {
+      for (const key in props) {
+        hostPatchProp(el, key, props[key]);
+      }
+    }
 
     if (isTextChildren(shapeFlag)) {
       hostSetElementText(el, vnode.children as string);
